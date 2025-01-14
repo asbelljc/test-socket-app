@@ -1,9 +1,6 @@
-// Bare-bones WebSocket server in Node.js
-const http = require('http');
 const WebSocket = require('ws');
 
-const server = http.createServer();
-const wss = new WebSocket.Server({ server });
+const wss = new WebSocket.Server({ port: process.env.PORT || 3000 });
 
 let clients = new Map();
 
@@ -40,9 +37,4 @@ wss.on('connection', (ws, req) => {
     clients.delete(ws);
     broadcastUserList();
   });
-});
-
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`WebSocket server running on ws://localhost:${PORT}`);
 });
