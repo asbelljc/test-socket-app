@@ -1,10 +1,8 @@
-const express = require('express');
+// Bare-bones WebSocket server in Node.js
 const http = require('http');
 const WebSocket = require('ws');
-const os = require('os');
 
-const app = express();
-const server = http.createServer(app);
+const server = http.createServer();
 const wss = new WebSocket.Server({ server });
 
 let clients = new Map();
@@ -12,15 +10,20 @@ let clients = new Map();
 // Helper function to get IP address of a request
 function getIp(req) {
   const forwarded = req.headers['x-forwarded-for'];
-  return forwarded ? forwarded.split(',')[0] : req.connection.remoteAddress;
+  return forwarded ? forwarded.split(',')[0] : req.socket.remoteAddress;
 }
 
 wss.on('connection', (ws, req) => {
   const ip = getIp(req);
   clients.set(ws, ip);
 
-  // Notify all clients of the current user list
-  const updateClients = () => {
+  // Send the list of connected users to the new client
+  ws.send(
+    JSON.stringify({ type: 'users', data: Array.from(clients.values()) })
+  );
+
+  // Broadcast the updated list to all clients
+  const broadcastUserList = () => {
     const ips = Array.from(clients.values());
     const message = JSON.stringify({ type: 'users', data: ips });
     clients.forEach((_, client) => {
@@ -30,15 +33,16 @@ wss.on('connection', (ws, req) => {
     });
   };
 
-  updateClients();
+  broadcastUserList();
 
   // Handle client disconnection
   ws.on('close', () => {
     clients.delete(ws);
-    updateClients();
+    broadcastUserList();
   });
 });
 
-app.use(express.static('public'));
-
-module.exports = app;
+const PORT = 3000;
+server.listen(PORT, () => {
+  console.log(`WebSocket server running on ws://localhost:${PORT}`);
+});
