@@ -15,14 +15,14 @@ wss.on('connection', (ws, req) => {
 
   clients.set(ip, ws);
 
-  // Send the list of connected users to the new client
-  ws.send(
-    JSON.stringify({ type: 'users', data: Array.from(clients.values()) })
-  );
+  // // Send the list of connected users to the new client
+  // ws.send(
+  //   JSON.stringify({ type: 'users', data: Array.from(clients.values()) })
+  // );
 
   // Broadcast the updated list to all clients
   const broadcastUserList = () => {
-    const ips = Array.from(clients.values());
+    const ips = Array.from(clients.keys());
     const message = JSON.stringify({ type: 'users', data: ips });
     clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
