@@ -12,7 +12,8 @@ function getIp(req) {
 
 wss.on('connection', (ws, req) => {
   const ip = getIp(req);
-  clients.set(ws, ip);
+
+  clients.set(ip, ws);
 
   // Send the list of connected users to the new client
   ws.send(
@@ -23,7 +24,7 @@ wss.on('connection', (ws, req) => {
   const broadcastUserList = () => {
     const ips = Array.from(clients.values());
     const message = JSON.stringify({ type: 'users', data: ips });
-    clients.forEach((_, client) => {
+    clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(message);
       }
