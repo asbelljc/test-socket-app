@@ -42,7 +42,7 @@ wss.on('connection', (ws, req) => {
   });
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`WebSocket server running on ws://localhost:${PORT}`);
 });
